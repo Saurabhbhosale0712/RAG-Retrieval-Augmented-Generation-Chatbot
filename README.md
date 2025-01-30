@@ -33,6 +33,6 @@ This project aims to develop an **AI-powered chatbot** that enhances user intera
 ✔ **Scales easily** by integrating a relational database for structured chat history.  
 ✔ **Provides interactive & real-time responses** through a Flask API.  
 
-This project is ideal for AI-driven customer support, virtual assistants, or **any application that requires intelligent, context-aware chatbot interactions**. 🚀💡  
+This project is ideal for AI-driven customer support, virtual assistants, or **any application that requires intelligent, context-aware chatbot interactions**.   
 
 ---
