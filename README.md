@@ -1,3 +1,9 @@
+
+
+![image](https://github.com/user-attachments/assets/c4e6cdbe-aca4-422a-8bb5-325c121f4679)
+
+
+
 # RAG-Retrieval-Augmented-Generation-Chatbot
 
 #Intelligent Chatbot with RAG-Based Contextual Understanding**  
