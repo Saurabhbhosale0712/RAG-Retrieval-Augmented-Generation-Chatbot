@@ -1,43 +1,192 @@
-https://medium.com/@saurabhbhosale0002/building-an-intelligent-feedback-driven-chatbot-with-phi-2-and-sentence-transformers-1c03d5bf52a0
+Blog: https://medium.com/@saurabhbhosale0002/building-an-intelligent-feedback-driven-chatbot-with-phi-2-and-sentence-transformers-1c03d5bf52a0
 
-
-
-# RAG-Retrieval-Augmented-Generation-Chatbot
 
 #Intelligent Chatbot with RAG-Based Contextual Understanding**  
  
-This project aims to develop an **AI-powered chatbot** that enhances user interaction by retrieving relevant information from a knowledge base using **Retrieval-Augmented Generation (RAG)**. The chatbot integrates **Flask API, Faiss for vector search, MySQL for chat history storage, and Sentence Transformers for embedding-based retrieval**. It provides intelligent responses by analyzing user queries and fetching the most relevant data from a pre-indexed database.  
+----
+
+📌 Project Title: Context-Aware Question Answering Chatbot using Embeddings & Generative Language Model
+
+🌟 Overview:
+This project is an intelligent chatbot that answers user questions based on context retrieved from a knowledge base using embeddings and generates responses using a transformer-based language model (Phi-2). The chatbot allows interaction and collects user feedback to evaluate and improve the quality of answers.
 
 ---
 
-### **Project Objectives**  
-1. **Develop a Context-Aware Chatbot**  
-   - Implement an AI chatbot that understands user queries and retrieves meaningful responses using **RAG (Retrieval-Augmented Generation)**.  
+🔁 Complete Workflow Breakdown:
 
-2. **Efficient Information Retrieval with Faiss**  
-   - Use **Faiss (Facebook AI Similarity Search)** to store and retrieve top-k relevant text chunks based on semantic similarity.  
+1. 🔧 Setup & Model Initialization
 
-3. **Integrate a Scalable Database (MySQL)**  
-   - Store user interactions in a **MySQL database** for conversation history tracking and future analysis.  
+   ✅ Code:
+   ```python
+   from sentence_transformers import SentenceTransformer
+   from transformers import AutoTokenizer, AutoModelForCausalLM
+   import torch
+   ```
 
-4. **Deploy a Web-Based Chat API using Flask**  
-   - Create a RESTful **Flask API** that allows users to send queries and receive intelligent responses in real-time.  
+   ✅ Purpose:
+   Import the required libraries to load:
+   - SentenceTransformer for encoding queries into embeddings.
+   - Transformers (from HuggingFace) to load the Phi-2 language model.
 
-5. **Enhance Model Performance with Sentence Transformers**  
-   - Utilize the **"all-MiniLM-L6-v2" model** from **Sentence Transformers** to generate query embeddings for fast and accurate retrieval.  
+   ✅ Why:
+   These models enable semantic understanding (via embeddings) and natural language generation (via Phi-2).
 
-6. **Enable Real-Time Accessibility with Ngrok**  
-   - Use **Ngrok** to expose the chatbot API for remote access and testing, allowing seamless deployment in cloud-based environments.  
+---
+
+2. 🤖 Load Pretrained Models
+
+   ✅ Code:
+   ```python
+   embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+   tokenizer = AutoTokenizer.from_pretrained("microsoft/phi-2")
+   phi_model = AutoModelForCausalLM.from_pretrained("microsoft/phi-2", torch_dtype=torch.float16, device_map="auto")
+   ```
+
+   ✅ Purpose:
+   - all-MiniLM-L6-v2: Encodes sentences into vector representations for semantic search.
+   - Phi-2: A powerful language model for generating human-like answers.
+
+   ✅ Why:
+   - MiniLM is lightweight, fast, and accurate for vector search.
+   - Phi-2 generates fluent answers based on retrieved knowledge.
 
 ---
 
-### **Why is this Project Important?**  
-✔ **Improves chatbot intelligence** by using RAG for enhanced response accuracy.  
-✔ **Reduces search time** with Faiss for fast and efficient retrieval.  
-✔ **Scales easily** by integrating a relational database for structured chat history.  
-✔ **Provides interactive & real-time responses** through a Flask API.  
+3. 🧠 Start Interactive QA Loop
 
-This project is ideal for AI-driven customer support, virtual assistants, or **any application that requires intelligent, context-aware chatbot interactions**.   
+   ✅ Code:
+   ```python
+   while True:
+       query = input("Ask your question (or type 'byy'/'stop' to exit): ").strip().lower()
+       if query in ["byy", "stop"]:
+           print("Thanks for using the chatbot! 👋")
+           break
+   ```
+
+   ✅ Purpose:
+   - Accepts user input.
+   - Allows repeated question-answer interaction until the user exits.
+
+   ✅ Why:
+   Enables a continuous chat experience for the user.
 
 ---
+
+4. 📈 Semantic Embedding of the Query
+
+   ✅ Code:
+   ```python
+   query_embedding = embedding_model.encode(query).tolist()
+   results = collection.query(query_embeddings=[query_embedding], n_results=3)
+   retrieved_chunks = [res["text"] for res in results["metadatas"][0]]
+   context = "\n".join(retrieved_chunks)
+   ```
+
+   ✅ Purpose:
+   - Encodes the query into a semantic vector.
+   - Searches a vector database (e.g., ChromaDB, FAISS, Pinecone) to retrieve top-matching documents or text chunks.
+
+   ✅ Why:
+   Retrieves the most relevant information from a knowledge base to provide accurate context for answering the query.
+
+---
+
+5. ✍️ Generate the Answer using Phi-2 Model
+
+   ✅ Code:
+   ```python
+   prompt = f"""Use the following context to answer the question below:
+
+   Context:
+   {context}
+
+   Question:
+   {query}
+
+   Answer:"""
+   ```
+
+   ✅ Purpose:
+   - Builds a structured prompt with context + question to guide the language model.
+   - Tokenizes the prompt and feeds it into Phi-2.
+
+   ✅ Why:
+   Phi-2 needs a clear prompt with relevant background to generate focused answers.
+
+---
+
+6. 🗣️ Model Inference & Output
+
+   ✅ Code:
+   ```python
+   inputs = tokenizer(prompt, return_tensors="pt").to(phi_model.device)
+   outputs = phi_model.generate(**inputs, max_new_tokens=150, do_sample=True, temperature=0.7)
+   response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+   answer = response.split("Answer:")[-1].strip()
+   print("\n🤖 Chatbot Answer:", answer)
+   ```
+
+   ✅ Purpose:
+   - Performs model inference.
+   - Extracts only the answer portion of the generated output.
+   - Displays it to the user.
+
+   ✅ Why:
+   Ensures clean and human-readable output.
+
+---
+
+7. 📝 Collect Feedback
+
+   ✅ Code:
+   ```python
+   feedback = input("💬 Was this answer helpful? (yes/no): ").strip().lower()
+   feedback_log.append({
+       "question": query,
+       "answer": answer,
+       "feedback": feedback
+   })
+   ```
+
+   ✅ Purpose:
+   - Collects user feedback on the chatbot's response.
+   - Stores it in a list for later evaluation or analysis.
+
+   ✅ Why:
+   Useful for improving model performance, training future models, or tuning response generation.
+
+---
+
+🧠 Technologies & Concepts Used:
+
+| Component                      | Purpose                                               |
+|--------------------------------|--------------------------------------------------------|
+| SentenceTransformer            | Convert user query into vector form for semantic search |
+| Vector Store (e.g., Chroma/FAISS) | Store document embeddings and retrieve relevant content |
+| Transformers (Phi-2)           | Generate human-like responses using context-aware prompts |
+| Prompt Engineering             | Create structured inputs for accurate generation    |
+| Feedback Mechanism             | Capture user satisfaction to improve chatbot behavior |
+
+---
+
+📦 Potential Use Cases:
+
+- Customer Support Bots
+- Personalized Knowledge Assistants
+- Document Q&A Systems (PDFs, websites)
+- Research Summarization Assistants
+- Contextual Help in Education or Software
+
+---
+
+📌 Next Steps (Optional Enhancements):
+
+- Save feedback_log to CSV or JSON
+- Add PDF/URL ingestion to feed the vector DB (already included in earlier code)
+- Use LangChain or Haystack for modular pipeline building
+- Build a frontend with Streamlit or Gradio
+- Deploy the chatbot as a web or mobile app
+
+---
+
 
